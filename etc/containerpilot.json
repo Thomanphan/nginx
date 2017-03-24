@@ -1,10 +1,11 @@
 {
   "consul": "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500",
-  "preStart": "generate-config",
   "services": [
     {
       "name": "nginx",
       "port": 80,
+      "preStart": "generate-config",
+      "exec": "nginx -g daemon off",
       "health": "health-check http",
       "poll": 10,
       "ttl": 25,
@@ -41,11 +42,10 @@
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
-    }{{ end }}
-  ],
-  "coprocesses": [{{ if .CONSUL_AGENT }}
+    }{{ end }}{{ if .CONSUL_AGENT }},
     {
-      "command": ["consul", "agent",
+      "name": "consul-agent",
+      "exec": ["consul", "agent",
                   "-data-dir=/var/lib/consul",
                   "-config-dir=/etc/consul",
                   "-rejoin",
@@ -57,9 +57,16 @@
     {{ if and .CONSUL_AGENT .ACME_DOMAIN }},{{ end }}
     {{ if .ACME_DOMAIN }}
     {
-      "command": ["acme", "watch"],
+      "name": "acme-watch",
+      "exec": ["acme", "watch"],
       "restarts": "unlimited"
-    }{{ end }}],
+    },
+    {
+      "name": "acme-checkin",
+      "exec": [ "acme", "checkin" ],
+      "frequency": "1h",
+      "timeout": "10s"{{ end }}
+    ],
   "telemetry": {
     "port": 9090,
     "sensors": [
@@ -78,12 +85,5 @@
         "check": ["sensor", "connections_load"]
       }
     ]
-  },
-  "tasks": [{{ if .ACME_DOMAIN }}
-    {
-      "name": "acme-checkin",
-      "command": [ "acme", "checkin" ],
-      "frequency": "1h",
-      "timeout": "10s"
-    }{{ end }}]
+  }
 }

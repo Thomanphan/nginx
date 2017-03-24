@@ -33,10 +33,10 @@ RUN export CONSUL_TEMPLATE_VERSION=0.18.0 \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 3.0.0-dev
+ENV CONTAINERPILOT_VER 3.0.0-dev.1
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=84944cf9129eae9fc520700a5044a2419b4c0f33 \
+RUN export CONTAINERPILOT_CHECKSUM=bbeb4ed54d2e192fdd42d195fb3a0aa5726837b5 \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
@@ -71,7 +71,4 @@ RUN mkdir -p /var/www/acme/challenge
 # Consul session data written here
 RUN mkdir -p /var/consul
 
-CMD [ "/usr/local/bin/containerpilot", \
-    "nginx", \
-        "-g", \
-        "daemon off;"]
+CMD "/usr/local/bin/containerpilot"
