@@ -71,4 +71,4 @@ RUN mkdir -p /var/www/acme/challenge
 # Consul session data written here
 RUN mkdir -p /var/consul
 
-CMD "/usr/local/bin/containerpilot"
+CMD ["/usr/local/bin/containerpilot"]
