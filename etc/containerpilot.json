@@ -5,7 +5,7 @@
       "name": "nginx",
       "port": 80,
       "preStart": "generate-config",
-      "exec": "nginx -g daemon off",
+      "exec": "nginx",
       "health": "health-check http",
       "poll": 10,
       "ttl": 25,
