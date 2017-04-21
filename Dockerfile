@@ -33,10 +33,10 @@ RUN export CONSUL_TEMPLATE_VERSION=0.18.0 \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 3.0.0-dev.1
-ENV CONTAINERPILOT file:///etc/containerpilot.json
+ENV CONTAINERPILOT_VER 3.0.0-dev.2
+ENV CONTAINERPILOT /etc/containerpilot.json5
 
-RUN export CONTAINERPILOT_CHECKSUM=bbeb4ed54d2e192fdd42d195fb3a0aa5726837b5 \
+RUN export CONTAINERPILOT_CHECKSUM=18332438fa764cc6f3d6bf21de3ae1c0641a42d9 \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
@@ -58,7 +58,7 @@ RUN export JQ_VERSION=1.5 \
 # Add our configuration files and scripts
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY etc/acme /etc/acme
-COPY etc/containerpilot.json /etc/
+COPY etc/containerpilot.json5 /etc/
 COPY etc/nginx /etc/nginx/templates
 COPY bin /usr/local/bin
 
