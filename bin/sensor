@@ -9,19 +9,26 @@ help() {
 
 # Cummulative number of dropped connections
 unhandled() {
-    local accepts=$(curl -s --fail localhost/nginx-health | awk 'FNR == 3 {print $1}')
-    local handled=$(curl -s --fail localhost/nginx-health | awk 'FNR == 3 {print $2}')
-    echo $(expr ${accepts} - ${handled})
+    local scraped=$(curl -s --fail localhost/nginx-health)
+    local accepts=$(echo "$scraped" | awk 'FNR == 3 {print $1}')
+    local handled=$(echo "$scraped" | awk 'FNR == 3 {print $2}')
+    local connections_unhandled=$(expr ${accepts} - ${handled})
+    /usr/local/bin/containerpilot \
+        -putmetric \
+        "nginx_connections_unhandled_total=$connections_unhandled"
 }
 
 # ratio of connections-in-use to available workers
 connections_load() {
-    local scraped=$(curl -s --fail localhost/nginx-health)
-    local active=$(echo ${scraped} | awk '/Active connections/{print $3}')
-    local waiting=$(echo ${scraped} | awk '/Reading/{print $6}')
-    local workers=$(echo $(cat /etc/nginx/nginx.conf | perl -n -e'/worker_connections *(\d+)/ && print $1')
-)
-    echo $(echo "scale=4; (${active} - ${waiting}) / ${workers}" | bc)
+    local scraped active waiting workers connections_load
+    scraped=$(curl -s --fail localhost/nginx-health)
+    active=$(echo "$scraped" | awk '/Active connections/{print $3}')
+    waiting=$(echo "$scraped" | awk '/Reading/{print $6}')
+    workers=$(cat /etc/nginx/nginx.conf | perl -n -e'/worker_connections *(\d+)/ && print $1')
+    connections_load=$(echo "scale=4; (${active} - ${waiting}) / ${workers}" | bc)
+    /usr/local/bin/containerpilot \
+        -putmetric \
+        "nginx_connections_load=$connections_load"
 }
 
 # -------------------------------------------------------
